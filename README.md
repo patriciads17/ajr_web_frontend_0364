@@ -1,4 +1,4 @@
-# ajr_web_backend_0364
+# ajr_web_frontend_0364
 
 ## Project setup
 ```
