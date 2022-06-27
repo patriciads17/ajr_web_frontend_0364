@@ -52,12 +52,12 @@
                                             </v-btn>
                                         </v-row>
                                         <v-row>
-                                            <v-btn class="my-5" v-if="btnEdit == true" @click="save" rounded outlined color="success">
+                                            <v-btn class="my-5" v-if="btnEdit == true" @click="dialogConfirm = true ; dialogType = 'Are you sure you want to save these changes?'" rounded outlined color="success">
                                                 <v-icon>mdi-check-bold</v-icon>
                                             </v-btn>
                                         </v-row>
                                         <v-row>
-                                            <v-btn  v-if="btnEdit == true" @click="cancel" rounded outlined color="error">
+                                            <v-btn  v-if="btnEdit == true" @click="dialogConfirm = true ; dialogType = 'Are you sure you want to cancel these changes?'" rounded outlined color="error">
                                                 <v-icon>mdi-close-thick</v-icon>
                                             </v-btn>
                                         </v-row>
@@ -92,9 +92,22 @@
                         </v-col>
                     </v-row>
                 </v-form>
+                <v-dialog v-model="dialogConfirm" persistent max-width="400px">
+                    <v-card>
+                        <v-card-title>
+                            <span class="headline"> Warning! </span>
+                        </v-card-title>
+                        <v-card-text class="dialogtext" v-html="dialogText"> {{ dialogText }}</v-card-text>
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="indigo" class="font-weight-bold" text @click="dialogConfirm = false">Cancel</v-btn>
+                            <v-btn color="error" class="font-weight-bold" text @click="setDialog">Yes</v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
             </v-row>
         </v-container>
-        <v-snackbar v-model="snackbar" :color="color" timeout="2000" bottom>{{ error_message }}</v-snackbar>
+        <v-snackbar v-model="snackbar" style="font-family: Rubik" :color="color" timeout="2000" bottom>{{ error_message }}</v-snackbar>
     </div>
 </template>
 
@@ -154,6 +167,8 @@
             snackbar: false,
             error_message: '',
             color: '',
+            dialogType: null,
+            dialogConfirm: false,
             btnEdit: false,
             genders: ['Male','Female'],
             employee: [],
@@ -170,6 +185,16 @@
     },
 
     methods: {
+        setDialog(){
+            if(this.dialogType == 'Are you sure you want to save these changes?'){
+                this.dialogConfirm = false;
+                this.save();
+            }else if(this.dialogType == 'Are you sure you want to cancel these changes?'){
+                this.dialogConfirm = false;
+                this.cancel();
+            }
+        },
+
         readDataShift(){
             var url = this.$api + '/myShift/' + localStorage.getItem('id');
             this.$http.get(url, {
@@ -204,6 +229,7 @@
                 this.employee = response.data.data;
             })
         },
+        
         save() {
             this.updatedData.append('nama_pegawai',this.employee.nama_pegawai);
             this.updatedData.append('alamat_pegawai',this.employee.alamat_pegawai);
@@ -288,7 +314,10 @@
     computed: {
         cardtitle () {
             return this.btnEdit === false ? 'My Profile' : 'Edit My Profile'
-        }
+        },
+        dialogText() {
+            return this.dialogType;
+        },
     }
   }
 </script>

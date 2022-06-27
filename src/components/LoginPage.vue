@@ -1,6 +1,6 @@
 <template>
     <div> 
-        <v-container fluid fill-height class="posisinya indigo accent-1 "> 
+        <v-container fluid fill-height class="posisinya indigo lighten-3 "> 
             <v-layout flex align-center justify-center> 
                 <v-flex xs12 sm4 elevation-6>    
                     <v-card elevation="2" outlined shaped> 
@@ -20,7 +20,7 @@
                             </div> 
                         </v-card-text> 
                     </v-card>
-                    <V-snackbar v-model="snackbar" :color="color" timeout="2000" bottom>{{ error_message }}</v-snackbar> 
+                    <V-snackbar v-model="snackbar"  style="font-family: Rubik" :color="color" timeout="2000" bottom>{{ error_message }}</v-snackbar> 
                 </v-flex> 
             </v-layout> 
         </v-container> 
@@ -92,34 +92,44 @@
                     }).then(response => {
                         localStorage.setItem('id', response.data.user.id); 
                         localStorage.setItem('token', response.data.access_token); 
-                        this.error_message = response.data.message; 
-                        this.color = "green"; 
-                        this.snackbar = true; 
-                        this.load = false; 
-                        this.clear(); 
-                        if(response.data.user.idRole == 'MGR'){
-                            localStorage.setItem('idRole', response.data.user.idRole); 
-                            this.$router.push({
-                            name: 'ManagerPage', 
-                            }); 
+                        if(response.data.user.status_akun != 'Deleted' || response.data.user.idRole == 'MGR' || response.data.user.idRole == 'ADM' || response.data.user.idRole == 'CSV' ){
+                            this.error_message = response.data.message; 
+                            this.color = "green"; 
+                            this.snackbar = true; 
+                            this.load = false; 
+                            this.clear(); 
+                            if(response.data.user.idRole == 'MGR'){
+                                localStorage.setItem('idRole', response.data.user.idRole); 
+                                this.$router.push({
+                                name: 'ManagerPage', 
+                                }); 
+                            }
+                            else if(response.data.user.idRole == 'ADM'){
+                                localStorage.setItem('idRole', response.data.user.idRole); 
+                                this.$router.push({
+                                name: 'AdminPage', 
+                                }); 
+                            }
+                            else if(response.data.user.idRole == 'CSV'){
+                                localStorage.setItem('idRole', response.data.user.idRole); 
+                                this.$router.push({
+                                name: 'CSPage', 
+                                }); 
+                            } 
+                            else{
+                                this.$router.push({
+                                name: 'CustomerPage', 
+                                }); 
+                            }
+                        }else if(response.data.user.status_akun == 'Deleted'){
+                            this.error_message = 'Login Failed!'; 
+                            this.color = "error"; 
+                            this.snackbar = true; 
+                            this.load = false; 
+                            this.clear(); 
                         }
-                        else if(response.data.user.idRole == 'ADM'){
-                            localStorage.setItem('idRole', response.data.user.idRole); 
-                            this.$router.push({
-                            name: 'AdminPage', 
-                            }); 
-                        }
-                        else if(response.data.user.idRole == 'CSV'){
-                            localStorage.setItem('idRole', response.data.user.idRole); 
-                            this.$router.push({
-                            name: 'CSPage', 
-                            }); 
-                        } 
-                        else{
-                            this.$router.push({
-                            name: 'CustomerPage', 
-                            }); 
-                        }
+
+                        
                     }).catch(error => {
                         this.error_message = error.response.data.message; 
                         this.color = "red"; 

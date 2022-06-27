@@ -9,8 +9,9 @@ import axios from "axios";
 Vue.config.productionTip = false;
 
 Vue.prototype.$http = axios;
-Vue.prototype.$api = 'http://127.0.0.1:8000/api';
-Vue.prototype.$imgloader = 'http://127.0.0.1:8000/storage/';
+
+Vue.prototype.$api = 'https://ajr-backend.project-patricia.xyz/api';
+Vue.prototype.$imgloader = 'https://ajr-backend.project-patricia.xyz/storage/public/';
 
 new Vue({
   vuetify,router,render:(h) => h(App),

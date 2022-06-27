@@ -77,8 +77,9 @@
             employee: [],
             drawer: true,
             items: [
-            { title: 'My Account', icon: 'mdi-account', to: '/myProfileAdmin' },
+            { title: 'My Profile', icon: 'mdi-account', to: '/myProfileAdmin' },
             { title: 'Data Employee', icon: 'mdi-account-tie', to: '/tableEmployee' },
+            { title: 'Data Driver', icon: 'mdi-steering', to: '/tableDriver' },
             { title: 'Data Car', icon: 'mdi-car', to: '/tableCar' },
             { title: 'Data Partner', icon: 'mdi-handshake', to: '/tablePartner' },
             ],
@@ -107,6 +108,8 @@
                 }
             })
             localStorage.removeItem('token');
+            localStorage.removeItem('id');
+            localStorage.removeItem('idRole');
             this.$router.push({
                 name: 'IndexPage'
             });

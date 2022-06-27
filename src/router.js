@@ -24,9 +24,15 @@ const router = new VueRouter({
         },
         {
             path: "/register",
-            name: "RegisterPage",
-            meta: {title: 'Register Page'},
-            component: importComponent("RegisterPage"),
+            name: "RegisterCustomer",
+            meta: {title: 'Register Customer'},
+            component: importComponent("RegisterCustomer"),
+        },
+        {
+            path: "/registerDriver",
+            name: "RegisterDriver",
+            meta: {title: 'Register Driver'},
+            component: importComponent("RegisterDriver"),
         },
         {
             path: "/manager",
@@ -145,6 +151,12 @@ const router = new VueRouter({
                     name: "Data Employee",
                     meta: {requiresAuth:true}, 
                     component: importComponent("Administrator/DataEmployee"),
+                },
+                {
+                    path: "/tableDriver",
+                    name: "Data Driver",
+                    meta: {requiresAuth:true}, 
+                    component: importComponent("Administrator/DataDriver"),
                 },
                 {
                     path: "/tableCar",

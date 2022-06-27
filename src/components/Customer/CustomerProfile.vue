@@ -10,7 +10,7 @@
                             </v-card>
                         </v-row>
                         <v-row>
-                            <v-col class="mt-3 ml-8 mr-4 mb-3" cols="3">
+                            <v-col class="mt-10 ml-8 mr-4 mb-3" cols="3">
                                 <v-avatar size="120">
                                     <v-img v-if="btnEdit == false" :src="$imgloader+customer.url_pp_customer"></v-img>
                                     <v-img v-if="btnEdit == true" :src="preview_pp"></v-img>
@@ -25,24 +25,32 @@
                                 <v-chip class="mb-3" color="success" outlined> 
                                     Customer
                                 </v-chip>
-                                <v-chip :color="getColorGender(customer.gender_customer)" outlined> 
+                                <v-chip class="mb-3 mr-5" :color="getColorGender(customer.gender_customer)" outlined> 
                                     <v-icon left> {{ getIcon(customer.gender_customer) }} </v-icon> 
                                     {{ customer.gender_customer }} 
                                 </v-chip>
+                                <v-chip class="mb-3" :color="getColorAkun(customer.status_akun)" outlined> 
+                                    {{ customer.status_akun }} 
+                                </v-chip>
                             </v-col>
-                            <v-col class="mt-5 ml-10" cols="3">
+                            <v-col class="mt-9 ml-10" cols="3">
                                 <v-row>
                                     <v-btn class="my-10" v-if="btnEdit == false" @click.stop="btnEdit = !btnEdit" rounded outlined color="indigo">
                                         <v-icon>mdi-pencil</v-icon>
                                     </v-btn>
                                 </v-row>
                                 <v-row>
-                                    <v-btn class="my-8" v-if="btnEdit == true" @click="save" rounded outlined color="success">
+                                    <v-btn v-if="btnEdit == false" @click="removeAccountHandler" rounded outlined color="error">
+                                        <v-icon>mdi-account-remove</v-icon>
+                                    </v-btn>
+                                </v-row>
+                                <v-row>
+                                    <v-btn class="my-10" v-if="btnEdit == true" @click="dialogConfirm = true ; dialogType = 'Are you sure you want to save these changes?'" rounded outlined color="success">
                                         <v-icon>mdi-check-bold</v-icon>
                                     </v-btn>
                                 </v-row>
                                 <v-row>
-                                    <v-btn  v-if="btnEdit == true" @click="cancel" rounded outlined color="error">
+                                    <v-btn  v-if="btnEdit == true" @click="dialogConfirm = true ; dialogType = 'Are you sure you want to cancel these changes?'" rounded outlined color="error">
                                         <v-icon>mdi-close-thick</v-icon>
                                     </v-btn>
                                 </v-row>
@@ -96,6 +104,19 @@
                         </v-row>
                     </v-card>
                 </v-form>
+                <v-dialog v-model="dialogConfirm" persistent max-width="400px">
+                    <v-card>
+                        <v-card-title>
+                            <span class="headline"> Warning! </span>
+                        </v-card-title>
+                        <v-card-text class="dialogtext" v-html="dialogText"> {{ dialogText }}</v-card-text>
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="indigo" class="font-weight-bold" text @click="dialogConfirm = false">Cancel</v-btn>
+                            <v-btn color="error" class="font-weight-bold" text @click="setDialog">Yes</v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
             </v-row> 
         </v-container>
         <v-snackbar v-model="snackbar" :color="color" timeout="2000" bottom>{{ error_message }}</v-snackbar>
@@ -162,6 +183,8 @@
             snackbar: false,
             calendar: false,
             error_message: '',
+            dialogType: '',
+            dialogConfirm: false,
             color: '',
             btnEdit: false,
             genders: ['Male','Female'],
@@ -174,10 +197,24 @@
             preview_id: require('@/assets/noimg.jpg'),
             updatedData: new FormData,
             newPassword: null,
+            logoutIdentifier: new FormData,
         }
     },
 
     methods: {
+        setDialog(){
+            if(this.dialogType == 'Are you sure you want to save these changes?'){
+                this.dialogConfirm = false;
+                this.save();
+            }else if(this.dialogType == 'Are you sure you want to cancel these changes?'){
+                this.dialogConfirm = false;
+                this.cancel();
+            }else if(this.dialogType == 'Are you sure want to remove/delete your account?'){
+                this.dialogConfirm = false;
+                this.removeAccount();
+            }
+        },
+
         readData() {
             var url = this.$api + '/user/' + localStorage.getItem('id');
             this.$http.get(url, {
@@ -188,6 +225,36 @@
                 this.customer = response.data.data;
             })
         },
+
+        removeAccountHandler(){
+            this.dialogConfirm = true;
+            this.dialogType = 'Are you sure want to remove/delete your account?';
+        },
+
+        removeAccount(){
+            let newData = {
+                    status_akun: 'Deleted',
+                }; 
+                var url = this.$api + '/removeAccount/'+localStorage.getItem('id'); 
+                this.load = true; 
+                this.$http.put(url, newData, { 
+                    headers: {
+                        'Authorization' : 'Bearer ' + localStorage.getItem('token')
+                    }
+                }).then(response => {
+                    this.error_message = response.data.message; 
+                    this.color = 'green'; 
+                    this.snackbar = true; 
+                    this.load = false;  
+                    this.logout();
+                }).catch(error => {
+                    this.error_message = error.response.data.message; 
+                    this.color = 'red'; 
+                    this.snackbar = true; 
+                    this.load = false;
+                });
+        },
+
         save() {
             this.updatedData.append('nama_customer',this.customer.nama_customer);
             this.updatedData.append('alamat_customer',this.customer.alamat_customer);
@@ -240,6 +307,11 @@
             else return 'transparent'
         },
         
+        getColorAkun (akun) {
+            if (akun === 'Active') return 'success'
+            else if (akun === 'Inactive') return 'error'
+        },
+        
         getIcon (gender) {
             if (gender === 'Female') return 'mdi-face-woman'
             else if (gender === 'Male') return 'mdi-face-man'
@@ -277,6 +349,23 @@
             this.url_sim = url_sim;
             this.preview_sim = URL.createObjectURL(url_sim);
         },
+
+        logout(){
+            this.logoutIdentifier.append('guard','user')
+            var url = this.$api + '/logout';
+            this.$http.post(url, this.logoutIdentifier, {
+                headers:{
+                    'Authorization' : 'Bearer ' + localStorage.getItem('token')
+                }
+            })
+            localStorage.removeItem('token');
+            localStorage.removeItem('id');
+            localStorage.removeItem('idRole');
+            this.$router.push({
+                name: 'IndexPage'
+            });
+            
+        }
         // Batas Coding 1
     },
 
@@ -287,7 +376,10 @@
     computed: {
         cardtitle () {
             return this.btnEdit === false ? 'My Profile' : 'Edit My Profile'
-        }
+        },
+        dialogText() {
+            return this.dialogType;
+        },
     },
   }
 </script>

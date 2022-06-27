@@ -77,7 +77,7 @@
             employee: [],
             drawer: true,
             items: [
-            { title: 'My Account', icon: 'mdi-account', to: '/myProfileCs' },
+            { title: 'My Profile', icon: 'mdi-account', to: '/myProfileCs' },
             { title: 'Data Customers', icon: 'mdi-account-group', to: '/tableCust' },
             { title: 'Data Transactions', icon: 'mdi-cart', to: '/tableTransaction' },
             ],
@@ -106,6 +106,8 @@
                 }
             })
             localStorage.removeItem('token');
+            localStorage.removeItem('id');
+            localStorage.removeItem('idRole');
             this.$router.push({
                 name: 'IndexPage'
             });

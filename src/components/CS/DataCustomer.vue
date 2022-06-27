@@ -36,10 +36,10 @@
                             </v-btn>
                         </template>
                         <template v-slot:[`item.activation`]="{ item }">
-                            <v-btn @click="update_on(item.id)" class="mx-2 mr-2" fab dark x-small :disabled="btnInactive=false" color="success">
+                            <v-btn v-if="item.status_akun == 'Inactive'" @click="dialogConfirm = true; dialogType = 'Are you sure want to activate this customer account?'; editId = item.id" class="mx-2 mr-2" fab dark x-small :disabled="btnInactive=false" color="success">
                                 <v-icon dark>mdi-check-bold</v-icon>
                             </v-btn>
-                            <v-btn @click="update_off(item.id)" class="mx-2 mr-2" fab dark x-small :disabled="btnActive=false" color="error">
+                            <v-btn v-if="item.status_akun == 'Active'" @click="dialogConfirm = true; dialogType = 'Are you sure want to inactivate this customer account?'; editId = item.id" class="mx-2 mr-2" fab dark x-small :disabled="btnActive=false" color="error">
                                 <v-icon dark>mdi-close-thick</v-icon>
                             </v-btn>
                         </template> 
@@ -72,9 +72,22 @@
                         </v-card-text> 
                         <v-card-actions>
                             <v-spacer></v-spacer> 
-                            <v-btn v-if="btnShow == true" color="blue darken-1" text @click="close"> Close </v-btn>
+                            <v-btn v-if="btnShow == true" color="indigo" class="font-weight-bold" text @click="close"> Close </v-btn>
                         </v-card-actions> 
                     </v-card> 
+                </v-dialog>
+                <v-dialog v-model="dialogConfirm" persistent max-width="400px">
+                    <v-card>
+                        <v-card-title>
+                            <span class="headline"> Warning! </span>
+                        </v-card-title>
+                        <v-card-text> {{ dialogText }} </v-card-text>
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="indigo" class="font-weight-bold" text @click="dialogConfirm = false">Cancel</v-btn>
+                            <v-btn color="error" class="font-weight-bold" text @click="setDialog">Yes</v-btn>
+                        </v-card-actions>
+                    </v-card>
                 </v-dialog>
             </v-row>
         </v-container>
@@ -133,6 +146,8 @@
                 color: '',
                 search: null, 
                 dialog: false, 
+                dialogType: '',
+                editId: '',
                 dialogConfirm: false,
                 headers: [
                     {text: "ID", value: "id"},
@@ -167,6 +182,16 @@
 
 
         methods: {
+            setDialog(){
+                if(this.dialogType == "Are you sure want to activate this customer account?"){
+                    this.dialogConfirm = false;
+                   this.update_on();
+                }else if(this.dialogType == "Are you sure want to inactivate this customer account?"){
+                    this.dialogConfirm = false;
+                    this.update_off();
+                }       
+            },
+
             readData() {
                 var url = this.$api + '/users';
                 this.$http.get(url, {
@@ -178,14 +203,14 @@
                 })
             },
 
-            update_on(id){
+            update_on(){
                 this.btnActive = true;
-                this.updateData(id);
+                this.updateData(this.editId);
             },
 
-            update_off(id){
+            update_off(){
                 this.btnInactive = true;
-                this.updateData(id);
+                this.updateData(this.editId);
             },
 
             updateData(id) { 
@@ -230,11 +255,14 @@
 
             getColorSts(sts){
                 if(sts == 'Inactive') return 'error'
+                else if(sts == 'Deleted') return 'grey'
                 else return 'success'
+
             },
 
             getTextSts(sts){
                 if(sts == 'Inactive') return 'Inactive'
+                else if(sts == 'Deleted') return 'Deleted'
                 else return 'Active'
             },
 
@@ -256,6 +284,12 @@
                 this.readData();
             },
             //Batas coding 1
+        },
+
+        computed: {
+            dialogText() {
+                return this.dialogType;
+            },
         },
 
         mounted() {

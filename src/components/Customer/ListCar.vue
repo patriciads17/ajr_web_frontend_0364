@@ -97,7 +97,7 @@
                         'Authorization' : 'Bearer ' + localStorage.getItem('token')
                     }
                 }).then(response => {
-                    this.cars = response.data.data;
+                    this.cars = response.data.data_array;
                 })
             },
         },

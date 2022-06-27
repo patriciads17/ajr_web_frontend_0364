@@ -106,6 +106,8 @@
                 }
             })
             localStorage.removeItem('token');
+            localStorage.removeItem('id');
+            localStorage.removeItem('idRole');
             this.$router.push({
                 name: 'IndexPage'
             });

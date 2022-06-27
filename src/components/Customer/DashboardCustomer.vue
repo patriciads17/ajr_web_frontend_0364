@@ -74,7 +74,7 @@
             user: [],
             drawer: true,
             items: [
-            { title: 'My Account', icon: 'mdi-account', to: '/myProfileCust' },
+            { title: 'My Profile', icon: 'mdi-account', to: '/myProfileCust' },
             { title: 'Transaction', icon: 'mdi-cart', to: '/myTransaction' },
             { title: 'Car', icon: 'mdi-car-side', to: '/listCar' },
             { title: 'Promo', icon: 'mdi-ticket-percent', to:'/listPromo' },
@@ -106,6 +106,8 @@
                 }
             })
             localStorage.removeItem('token');
+            localStorage.removeItem('id');
+            localStorage.removeItem('idRole');
             this.$router.push({
                 name: 'IndexPage'
             });

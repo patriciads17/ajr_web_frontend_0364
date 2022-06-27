@@ -1,6 +1,7 @@
 <template>
     <div>
         <v-container fluid fill-height class="posisinya mt-5">
+            <!-- Form Shift -->
             <v-row align="centre" justify="center">
                 <v-card append rounded outlined elevation="4" width="1200px" height="150px">
                     <v-row align="left" justify="left" class="mt-n5">
@@ -13,23 +14,23 @@
                             <v-autocomplete  background-color="yellow" filled dense rounded class="formtxt" @change="readEmployeeName(form.role_employee)" v-model="form.role_employee" :items="role" label="Employee Role"></v-autocomplete>
                         </v-col>
                         <v-col class="ml-5 mt-5" cols="3">
-                            <v-autocomplete  background-color="yellow" filled dense rounded class="formtxt" @change="getIdEmployee(form.name_employee)" v-model="form.name_employee" :items="list" label="Employee Name"></v-autocomplete>
+                            <v-autocomplete  background-color="yellow" filled dense rounded class="formtxt" v-model="form.name_employee" :items="list" label="Employee Name"></v-autocomplete>
                         </v-col> 
                         <v-col class="ml-5 mt-5" cols="2">
                             <v-autocomplete  background-color="yellow" filled dense rounded class="formtxt" v-model="form.day_shift" :items="day" label="Day"></v-autocomplete>
                         </v-col>
                         <v-col class="ml-5 mt-5" cols="2">
-                            <v-autocomplete  background-color="yellow" filled dense rounded class="formtxt" v-model="form.session_shift" :items="session" label="Session" @change="getIdShift(form.day_shift,form.session_shift)"></v-autocomplete>
+                            <v-autocomplete  background-color="yellow" filled dense rounded class="formtxt" v-model="form.session_shift" :items="session" label="Session" ></v-autocomplete>
                         </v-col>
                         <v-col class="ml-5 mt-5" cols="1">
-                            <v-btn :disabled="select == false" @click="save" rounded large class=" white--text" color="indigo">
+                            <v-btn :disabled="select == false" @click="saveHandler();getIdEmployee(form.name_employee);getIdShift(form.day_shift,form.session_shift)" rounded large class=" white--text" color="indigo">
                                 <v-icon left color="white">mdi-content-save</v-icon>Save
                             </v-btn>
                         </v-col>
                     </v-row>
                 </v-card>
             </v-row>
-
+            <!-- Shift Table -->
             <v-row class="table mt-n10" align="centre" justify="center" >
                 <v-card append rounded outlined elevation="4" width="700px" max-height="400px">
                     <v-row align="left" justify="left" class="mt-n5">
@@ -44,10 +45,10 @@
                     </v-row>
                     <v-data-table height="200px" class="datacust mt-4 mx-10" :headers="headers" :items="details" :search="search">
                         <template v-slot:[`item.actions`]="{ item }">
-                            <v-btn @click="showHandler(item)" class="mx-2 mr-2" fab dark x-small color="indigo">
+                            <v-btn @click="showHandler(item);getShift(item.id_shift);getEmployee(item.id_pegawai);" class="mx-2 mr-2" fab dark x-small color="indigo">
                                 <v-icon dark>mdi-eye</v-icon>
                             </v-btn>
-                            <v-btn @click="editHandler(item)" class="mx-2 mr-2" fab dark x-small color="success">
+                            <v-btn @click="editHandler(item);getShift(item.id_shift);getEmployee(item.id_pegawai)" class="mx-2 mr-2" fab dark x-small color="success">
                                 <v-icon dark>mdi-pencil</v-icon>
                             </v-btn>
                             <v-btn @click="deleteHandler(item.id)" class="mx-2 mr-2" fab dark x-small color="error">
@@ -56,6 +57,7 @@
                         </template>
                     </v-data-table> 
                 </v-card>
+                <!-- Dialog Show and Update -->
                 <v-dialog v-model="dialog" persistent max-width="600px"> 
                     <v-card> 
                         <v-card-title>
@@ -64,29 +66,30 @@
                         <v-card-text> 
                             <v-container> 
                                 <v-autocomplete class="formtxt" v-model="dialogform.role_employee" label="Employee Role" @change="readEmployeeName(dialogform.role_employee)" :items="role" required :readonly="btnShow == true"></v-autocomplete>
-                                <v-autocomplete class="formtxt" v-model="dialogform.name_employee" label="Employee Name" @change="getIdEmployee(dialogform.name_employee)" :items="list" required :readonly="btnShow == true"></v-autocomplete>
+                                <v-autocomplete class="formtxt" v-model="dialogform.name_employee" label="Employee Name" :items="list" required :readonly="btnShow == true"></v-autocomplete>
                                 <v-autocomplete class="formtxt" v-model="dialogform.day_shift" label="Day Shift" :items="day" required :readonly="btnShow == true"></v-autocomplete>
-                                <v-autocomplete class="formtxt" v-model="dialogform.session_shift" label="Session Shift" :items="session" required :readonly="btnShow == true" @change="getIdShift(dialogform.day_shift,dialogform.session_shift)"></v-autocomplete>
+                                <v-autocomplete class="formtxt" v-model="dialogform.session_shift" label="Session Shift" :items="session" required :readonly="btnShow == true"></v-autocomplete>
                             </v-container> 
                         </v-card-text> 
                         <v-card-actions>
                             <v-spacer></v-spacer> 
-                            <v-btn v-if="btnShow == true" color="blue darken-1" text @click="unshow"> Close </v-btn>
-                            <v-btn v-if="btnShow == false" color="blue darken-1" text @click="cancel"> Cancel </v-btn>
-                            <v-btn v-if="btnShow == false" color="blue darken-1" text @click="update"> Save </v-btn> 
+                            <v-btn v-if="btnShow == true" color="indigo" class="font-weight-bold" text @click="unshow();resetDialogForm()"> Close </v-btn>
+                            <v-btn v-if="btnShow == false" color="indigo" class="font-weight-bold" text @click="cancel();resetDialogForm()"> Cancel </v-btn>
+                            <v-btn v-if="btnShow == false" color="success" class="font-weight-bold" text @click="saveUpdateHandler(); getIdShift(dialogform.day_shift,dialogform.session_shift); getIdEmployee(dialogform.name_employee)"> Save </v-btn> 
                         </v-card-actions> 
                     </v-card> 
                 </v-dialog>
+                <!-- Dialog Confirm -->
                 <v-dialog v-model="dialogConfirm" persistent max-width="400px">
                     <v-card>
                         <v-card-title>
                             <span class="headline"> Warning! </span>
                         </v-card-title>
-                        <v-card-text> Are you sure want to delete this shift? </v-card-text>
+                        <v-card-text> {{ dialogText }} </v-card-text>
                         <v-card-actions>
                             <v-spacer></v-spacer>
-                            <v-btn color="blue darken-1" text @click="dialogConfirm = false">Cancel</v-btn>
-                            <v-btn color="blue darken-1" text @click="deleteData">Delete</v-btn>
+                            <v-btn color="indigo" class="font-weight-bold" text @click="dialogConfirm = false">Cancel</v-btn>
+                            <v-btn color="error" class="font-weight-bold" text @click="setDialog">Yes</v-btn>
                         </v-card-actions>
                     </v-card>
                 </v-dialog>
@@ -145,6 +148,7 @@
                 search: null, 
                 dialog: false, 
                 dialogConfirm: false,
+                dialogType:'',
                 headers: [
                     {text: "ID", value: "id"},
                     {text: "ID Shift", value: "id_shift"},
@@ -183,6 +187,19 @@
 
 
         methods: { 
+            setDialog(){
+                if(this.dialogType == 'Are you sure want to delete these data?'){
+                    this.dialogConfirm = false;
+                    this.deleteData();
+                }else if(this.dialogType == 'Are you sure want to save these data shift?'){
+                    this.dialogConfirm = false;
+                    this.save();
+                }else if(this.dialogType == 'Are you sure want to change these data shift?'){
+                    this.dialogConfirm = false;
+                    this.update();
+                }
+            },
+
             readEmployeeName(role){
                 var url = this.$api + '/name_employee/'+ role;
                 this.$http.get(url, {
@@ -191,7 +208,6 @@
                     }
                 }).then(response => {
                     this.list = response.data.data;
-                    console.log(this.list);
                 })
             }, 
 
@@ -215,7 +231,6 @@
                     }
                 }).then(response => {
                     this.id_pegawai = response.data.data[0];
-                    console.log(this.id_pegawai);
                     this.validationShift(this.id_pegawai);
                 })
             },
@@ -228,7 +243,9 @@
                     }
                 }).then(response => {
                     this.employee = response.data.data[0];
-                    console.log(this.employee);
+                    this.dialogform.name_employee = this.employee.nama_pegawai;
+                    this.dialogform.role_employee = this.employee.idRole;
+                    this.readEmployeeName(this.employee.idRole)
                 })
             },
 
@@ -240,7 +257,6 @@
                     }
                 }).then(response => {
                     this.id_shift = response.data.data[0];
-                    console.log(this.id_shift);
                 })
             },
 
@@ -252,14 +268,19 @@
                     }
                 }).then(response => {
                     this.shift = response.data.data[0];
-                    console.log(this.shift);
+                    this.dialogform.day_shift = this.shift.hari_shift; 
+                    this.dialogform.session_shift = this.shift.jadwal_shift; 
                 })
+            },
+
+            saveHandler(){
+                this.dialogConfirm = true;
+                this.dialogType = 'Are you sure want to save these data shift?'
             },
 
             save(){
                 this.detail.append('id_pegawai',this.id_pegawai);
                 this.detail.append('id_shift',this.id_shift);
-
                 var url = this.$api + '/detailshift' 
                 this.load = true; 
                 this.$http.post(url, this.detail, { 
@@ -293,16 +314,15 @@
                 })
             },
 
-            showHandler(item) {
+            showHandler() {
                 this.btnShow = true;
                 this.inputType = 'Show'; 
-                this.getEmployee(item.id_pegawai);
-                this.dialogform.name_employee = this.employee.nama_pegawai;
-                this.dialogform.role_employee = this.employee.idRole;
-                this.getShift(item.id_shift);
-                this.dialogform.day_shift = this.shift.hari_shift; 
-                this.dialogform.session_shift = this.shift.jadwal_shift; 
                 this.dialog = true;
+            },
+
+            saveUpdateHandler(){
+                this.dialogConfirm = true;
+                this.dialogType = 'Are you sure want to change these data shift?'
             },
 
             update() {
@@ -310,8 +330,8 @@
                     id_pegawai : this.id_pegawai,
                     id_shift : this.id_shift, 
                 }; 
-                console.log(newData.id_pegawai);
-                console.log(newData.id_shift);
+                console.log(this.id_pegawai);
+                console.log(this.id_shift);
                 var url = this.$api + '/detailshift/' + this.editId; 
                 this.load = true; 
                 this.$http.put(url, newData, { 
@@ -361,17 +381,12 @@
             editHandler(item) {
                 this.inputType = 'Update'; 
                 this.editId = item.id;
-                this.getEmployee(item.id_pegawai);
-                this.dialogform.name_employee = this.employee.nama_pegawai;
-                this.dialogform.role_employee = this.employee.idRole;
-                this.getShift(item.id_shift);
-                this.dialogform.day_shift = this.shift.hari_shift; 
-                this.dialogform.session_shift = this.shift.jadwal_shift; 
                 this.dialog = true;
             },
 
             deleteHandler(id) {
                 this.deleteId = id; 
+                this.dialogType = 'Are you sure want to delete these data?';
                 this.dialogConfirm = true;
             },
 
@@ -399,11 +414,19 @@
 
             resetForm() { 
                 this.form = {
-                    kode_promo: null,
-                    syarat_promo: null,
-                    jenis_promo: null,
-                    status_promo: null,
-                    besar_potongan: null,
+                    role_employee: null,
+                    name_employee: null,
+                    day_shift: null,
+                    session_shift: null,
+                };
+            },
+
+            resetDialogForm() { 
+                this.dialogform = {
+                    role_employee: '',
+                    name_employee: '',
+                    day_shift: '',
+                    session_shift: '',
                 };
             },
             getColorStatus (status) {
@@ -415,6 +438,9 @@
         computed: {
             formTitle() {
                 return this.inputType;
+            },
+            dialogText() {
+                return this.dialogType;
             },
         },
 

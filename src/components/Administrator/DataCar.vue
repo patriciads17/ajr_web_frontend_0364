@@ -12,7 +12,6 @@
                         <v-col cols="4">
                             <v-text-field dense rounded filled background-color="yellow" v-model="search" append-icon="mdi-magnify" label="Search" single-line hide-details></v-text-field>
                         </v-col>
-                        
                         <v-btn @click="dialog = true" large class="mx-2" fab dark color="indigo">
                             <v-icon dark>mdi-plus</v-icon>
                         </v-btn>
@@ -26,16 +25,13 @@
                             <v-btn @click="editHandler(item)" class="mx-2 mr-2" fab dark x-small color="success">
                                 <v-icon dark>mdi-pencil</v-icon>
                             </v-btn>
-                            <v-btn @click="deleteHandler(item.id)" class="mx-2 mr-2" fab dark x-small color="black">
+                            <v-btn @click="deleteHandler(item.id)" class="mx-2 mr-2" fab dark x-small color="error">
                                 <v-icon dark>mdi-delete</v-icon>
                             </v-btn>
-                            <v-btn @click="alertHandler(item)" class="mx-2 mr-2" fab dark x-small color="error">
-                                <v-icon dark>mdi-exclamation-thick</v-icon>
-                            </v-btn>
                         </template>
-                        <template v-slot:[`item.deadline`]="{ item }">
-                           <v-chip class="datacust" :color="getdeadlineColor(item.deadline)" outlined> 
-                                {{ getdeadlineText(item.deadline) }} 
+                        <template v-slot:[`item.status_kontrak`]="{ item }">
+                            <v-chip class="datacust" :color="getdeadlineColor(item.status_kontrak)" v-if="item.kategori_aset == 'Partner'" outlined> 
+                                {{ getdeadlineText(item.status_kontrak) }} 
                             </v-chip>
                         </template>
                     </v-data-table> 
@@ -62,7 +58,7 @@
                                         <v-text-field class="formtxt" v-model="form.no_plat" label="Plat Number" required :readonly="btnShow == true"></v-text-field>
                                         <v-text-field class="formtxt" v-model="form.nama_mobil" label="Name" required :readonly="btnShow == true"></v-text-field>
                                         <v-text-field class="formtxt" v-model="form.tipe_mobil" label="Type" required :readonly="btnShow == true"></v-text-field>
-                                        <v-text-field class="formtxt" v-model="form.no_stnk" hide-details label="Vehicle Registration Number" required :readonly="btnShow == true"></v-text-field>
+                                        <v-text-field class="formtxt" v-model="form.no_stnk" counter label="Vehicle Registration Number" required :readonly="btnShow == true"></v-text-field>
                                     </v-col>
                                 </v-row>
                                 <v-row class="mt-3">
@@ -90,11 +86,11 @@
                                             </v-date-picker>
                                         </v-dialog>
                                         <v-text-field class="formtxt" v-model="form.tarif_harian_mobil" label="Daily Rent Costs" required :readonly="btnShow == true"></v-text-field>
-                                        <v-autocomplete class="formtxt" v-model="form.ketersediaan_mobil" :items="availability" label="Availability" :readonly="btnShow == true"></v-autocomplete>
                                         <v-autocomplete class="formtxt" v-model="form.kategori_aset" :items="proprietor" label="Proprietor" :readonly="btnShow == true"></v-autocomplete>
+                                        <v-autocomplete class="formtxt" v-model="form.ketersediaan_mobil" :items="availability" v-if="inputType == 'Update'" label="Availability" :readonly="btnShow == true"></v-autocomplete>
                                     </v-col>
                                     <v-col v-if="form.kategori_aset == 'Partner'" class="mb-3" cols="6">
-                                        <v-text-field class="formtxt" @change="getId(form.nama_mitra)" v-model="form.nama_mitra" label="Partner Name" required :readonly="btnShow == true"></v-text-field>
+                                        <v-text-field class="formtxt" v-bind="getIdMitra(form.nama_mitra)" v-model="form.nama_mitra" label="Partner Name" required :readonly="btnShow == true"></v-text-field>
                                         <v-dialog ref="dialog1" v-model="calendar1" :return-value.sync="form.tgl_mulai_kontrak" persistent width="290px" :disabled="btnShow == true">
                                             <template v-slot:activator="{ on, attrs }">
                                                     <v-text-field class="formtxt" v-model="form.tgl_mulai_kontrak" label="Start Contract" :readonly="btnShow == true" v-bind="attrs" v-on="on"></v-text-field>
@@ -115,16 +111,16 @@
                                                 <v-btn text color="primary" @click="$refs.dialog2.save(form.tgl_selesai_kontrak)">OK</v-btn>
                                             </v-date-picker>
                                         </v-dialog>
-                                        <v-text-field class="formtxt" v-model="form.status_kontrak" label="Status Contract" required :readonly="btnShow == true"></v-text-field>
+                                        <v-text-field class="formtxt" v-model="form.status_kontrak" label="Status Contract" required v-if="inputType == 'Update'" :readonly="btnShow == true"></v-text-field>
                                     </v-col>
                                 </v-row>
                             </v-container> 
                         </v-card-text> 
                         <v-card-actions>
                             <v-spacer></v-spacer> 
-                            <v-btn v-if="btnShow == true" color="blue darken-1" text @click="unshow"> Close </v-btn>
-                            <v-btn v-if="btnShow == false" color="blue darken-1" text @click="cancel"> Cancel </v-btn>
-                            <v-btn v-if="btnShow == false" color="blue darken-1" text @click="setForm"> Save </v-btn> 
+                            <v-btn v-if="btnShow == true" color="indigo" class="font-weight-bold" text @click="unshow"> Close </v-btn>
+                            <v-btn v-if="btnShow == false" color="indigo" class="font-weight-bold" text @click="cancel"> Cancel </v-btn>
+                            <v-btn v-if="btnShow == false" color="success" class="font-weight-bold" text @click="dialogConfirm = true; setForm()"> Save </v-btn> 
                         </v-card-actions> 
                     </v-card> 
                 </v-dialog>
@@ -133,11 +129,11 @@
                         <v-card-title>
                             <span class="headline"> Warning! </span>
                         </v-card-title>
-                        <v-card-text> Are you sure want to delete this car? </v-card-text>
+                        <v-card-text> {{dialogText}} </v-card-text>
                         <v-card-actions>
                             <v-spacer></v-spacer>
-                            <v-btn color="blue darken-1" text @click="dialogConfirm = false">Cancel</v-btn>
-                            <v-btn color="blue darken-1" text @click="deleteData">Delete</v-btn>
+                            <v-btn color="indigo" class="font-weight-bold" text @click="dialogConfirm = false">Cancel</v-btn>
+                            <v-btn color="error" class="font-weight-bold" text @click="setDialog">Yes</v-btn>
                         </v-card-actions>
                     </v-card>
                 </v-dialog>
@@ -210,11 +206,12 @@
                     {text: "Type", value: "tipe_mobil"},
                     {text: "Proprietor", value: "kategori_aset"},
                     {text: "Availability", value: "ketersediaan_mobil"},
-                    {text: "Deadline Contract", value: "deadline"},
+                    {text: "Status Contract", value: "status_kontrak"},
                     {text: "", value: "actions"},
                 ],
                 car: new FormData,
                 cars: [],
+                carsPartner: [],
                 form: { 
                     no_plat:null,
                     nama_mobil:null,
@@ -252,20 +249,34 @@
                 preview_car: require('@/assets/noimgcar.png'),
                 deadline: '',
                 btnAlert: false,
-                alertId: ''
+                btnEdit: false,
+                dialogType: 'Are you sure have filled in the correct and appropriate data?',
             };
         },
 
         methods: { 
+            setDialog(){
+                if(this.dialogType == 'Are you sure you want to delete these data?'){
+                    this.dialogConfirm = false;
+                    this.deleteData();
+                }else if(this.dialogType == 'Are you sure you want to save these changes?'){
+                    this.dialogConfirm = false;
+                    this.updateData();
+                }else if(this.dialogType == 'Are you sure have filled in the correct and appropriate data?'){
+                    this.dialogConfirm = false;
+                    this.saveData();
+                }
+            }, 
             setForm(){
                 if(this.inputType !== 'Create'){
-                    this.updateData();
+                    this.dialogType = 'Are you sure you want to save these changes?';
                 }else{
-                    this.saveData();
+                    this.dialogType = 'Are you sure have filled in the correct and appropriate data?';
                 }
             },
             
             readData() {
+                this.updateContract();
                 var url = this.$api + '/car';
                 this.$http.get(url, {
                     headers:{
@@ -273,6 +284,15 @@
                     }
                 }).then(response => {
                     this.cars = response.data.data;
+                })
+            },
+
+            updateContract() {
+                var url = this.$api + '/updateStatusContract';
+                this.$http.get(url, {
+                    headers:{
+                        'Authorization' : 'Bearer ' + localStorage.getItem('token')
+                    }
                 })
             },
             
@@ -405,6 +425,7 @@
             editHandler(item) {
                 this.getNameMitra(item.idMitra);
                 this.inputType = 'Update'; 
+                this.dialogType = 'Are you sure you want to save these changes?';
                 this.editId = item.id;
                 this.form.no_plat = item.no_plat;
                 this.form.nama_mobil = item.nama_mobil;
@@ -462,6 +483,7 @@
 
             deleteHandler(id) {
                 this.deleteId = id; 
+                this.dialogType = 'Are you sure you want to delete these data?'
                 this.dialogConfirm = true;
             },
 
@@ -513,20 +535,6 @@
                     status_kontrak:null,
                 };
             },
-            
-            alertHandler (item) {
-                var today = new Date();
-                var dd = String(today.getDate()).padStart(2, '0');
-                var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-                var yyyy = today.getFullYear();
-                today = yyyy + '-' + mm + '-' + dd;
-                const date1 = new Date(today);
-                const date2 = new Date(item.tgl_selesai_kontrak);
-                const diffTime = Math.abs(date2 - date1);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-                this.btnAlert = true;
-                this.setDeadline(item.id,item.idMitra,diffDays);
-            },
 
             getIdMitra(nameMitra) {
                 var url = this.$api +'/idpartner/'+ nameMitra;
@@ -547,6 +555,7 @@
                     }
                 }).then(response => {
                     this.mitraName = response.data.data;
+                    this.form.nama_mitra = this.mitraName; 
                 })
                 
             },
@@ -562,44 +571,16 @@
                 this.preview_car = URL.createObjectURL(url_car);
             },
 
-            setDeadline (id,id2,deadline){
-                if(id2 != null){
-                    let newData = {
-                        deadline: deadline,
-                    }; 
-                    var url = this.$api + '/deadline/'+id ; 
-                    this.load = true; 
-                    this.$http.put(url, newData, { 
-                        headers: {
-                            'Authorization' : 'Bearer ' + localStorage.getItem('token')
-                        }
-                    }).then(response => {
-                        this.error_message = response.data.message; 
-                        this.color = 'green'; 
-                        this.snackbar = true; 
-                        this.load = false; 
-                        this.close(); 
-                        this.readData(); 
-                        this.resetForm();
-                    }).catch(error => {
-                        this.error_message = error.response.data.message; 
-                        this.color = 'red'; 
-                        this.snackbar = true; 
-                        this.load = false;
-                    }); 
-                }
-            },
-
             getdeadlineColor(id){
-                if (( id == 0) ) return 'transparent' 
-                else if (( id > 7)) return 'green'
-                else if (( id <= 7) ) return 'error'
+                if (id == 'Active') return 'green' 
+                else if (id == 'Warning') return 'orange'
+                else if (id == 'Inactive' ) return 'error'
             },
 
             getdeadlineText (id) {
-                if (( id == 0) ) return ''
-                else if (( id > 7)) return 'Okay'
-                else if (( id <= 7)) return 'Alert'
+                if (id == 'Active') return 'Active' 
+                else if (id == 'Warning') return 'Warning'
+                else if (id == 'Inactive' ) return 'Inactive'
                 
             },
             // Batas Coding 1
@@ -609,6 +590,9 @@
         computed: {
             formTitle() {
                 return this.inputType;
+            },
+            dialogText() {
+                return this.dialogType;
             },
         },
 

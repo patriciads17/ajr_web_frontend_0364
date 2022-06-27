@@ -8,8 +8,8 @@
                             <v-card-title class="cardTitle pa-0 my-2 justify-center"> Employees Table </v-card-title>
                         </v-card>
                     </v-row>
-                    <v-row align="end" justify="end" class="mt-2 mr-5">
-                        <v-col cols="4">
+                    <v-row align="end" justify="end" class="mt-4 mr-5 ml-5 mb-5">
+                        <v-col cols="4" class="justify-right">
                             <v-text-field dense rounded filled background-color="yellow" v-model="search" append-icon="mdi-magnify" label="Search" single-line hide-details></v-text-field>
                         </v-col>
                         
@@ -17,7 +17,6 @@
                             <v-icon dark>mdi-plus</v-icon>
                         </v-btn>
                     </v-row>
-                    <v-divider class="mx-4 mt-6"></v-divider>
                     <v-data-table height="300px" class="datacust mx-4" :headers="headers" :items="employees" :search="search">
                         <template v-slot:[`item.idRole`]="{ item }">
                             <v-chip class="datacust" :color="getColorRole(item.idRole)" outlined> 
@@ -26,7 +25,7 @@
                         </template> 
                         <template v-slot:[`item.actions`]="{ item }">
                             <v-btn @click="showHandler(item)" class="mx-2 mr-2" fab dark x-small color="indigo">
-                                <v-icon dark>mdi-eye</v-icon>
+                                 <v-icon dark>mdi-eye</v-icon>
                             </v-btn>
                             <v-btn @click="editHandler(item)" class="mx-2 mr-2" fab dark x-small color="success">
                                 <v-icon dark>mdi-pencil</v-icon>
@@ -56,7 +55,7 @@
                                         <v-btn text color="primary" @click="$refs.dialog.save(form.tgl_lahir_pegawai)">OK</v-btn>
                                     </v-date-picker>
                                 </v-dialog>
-                                <v-text-field class="formtxt" v-model="form.no_telp_pegawai" label="Phone Number" required :readonly="btnShow == true"></v-text-field>
+                                <v-text-field class="formtxt" v-model="form.no_telp_pegawai" label="Phone Number" counter required :readonly="btnShow == true"></v-text-field>
                                 <v-text-field v-if="inputType == 'Create' || inputType == 'Show'" class="formtxt" v-model="form.email" label="Email" required :readonly="btnShow == true"></v-text-field>
                                 <v-text-field class="formtxt" v-model="form.alamat_pegawai" label="Address" required :readonly="btnShow == true"></v-text-field>
                                 <v-autocomplete class="formtxt" v-model="form.gender_pegawai" :items="genders" label="Gender" :readonly="btnShow == true"></v-autocomplete>
@@ -64,9 +63,9 @@
                         </v-card-text> 
                         <v-card-actions>
                             <v-spacer></v-spacer> 
-                            <v-btn v-if="btnShow == true" color="blue darken-1" text @click="unShow"> Close </v-btn>
-                            <v-btn v-if="btnShow == false" color="blue darken-1" text @click="cancel"> Cancel </v-btn>
-                            <v-btn v-if="btnShow == false" color="blue darken-1" text @click="setForm"> Save </v-btn> 
+                            <v-btn v-if="btnShow == true" color="indigo" class="font-weight-bold" text @click="unShow"> Close </v-btn>
+                            <v-btn v-if="btnShow == false" color="indigo" class="font-weight-bold" text @click="cancel"> Cancel </v-btn>
+                            <v-btn v-if="btnShow == false" color="success" class="font-weight-bold" text @click="dialogConfirm = true; setForm()"> Save </v-btn> 
                         </v-card-actions> 
                     </v-card> 
                 </v-dialog>
@@ -75,11 +74,11 @@
                         <v-card-title>
                             <span class="headline"> Warning! </span>
                         </v-card-title>
-                        <v-card-text> Are you sure want to delete this employee? </v-card-text>
+                        <v-card-text> {{ dialogText }} </v-card-text>
                         <v-card-actions>
                             <v-spacer></v-spacer>
-                            <v-btn color="blue darken-1" text @click="dialogConfirm = false">Cancel</v-btn>
-                            <v-btn color="blue darken-1" text @click="deleteData">Delete</v-btn>
+                            <v-btn color="indigo" class="font-weight-bold" text @click="dialogConfirm = false">Cancel</v-btn>
+                            <v-btn color="error" class="font-weight-bold" text @click="setDialog">Yes</v-btn>
                         </v-card-actions>
                     </v-card>
                 </v-dialog>
@@ -93,6 +92,11 @@
     @import url("https://fonts.googleapis.com/css?family=Akshar"); 
     @import url("https://fonts.googleapis.com/css?family=Rubik");
     @import url("https://fonts.googleapis.com/css?family=Josefin%20Sans");  
+
+    .tabtxt{
+        font-family: Akshar;
+        font-weight: bold;
+    }
 
     .posisinya{
         position: absolute; 
@@ -147,6 +151,7 @@
                 ],
                 employee: new FormData,
                 employees: [],
+                owners: [],
                 form: { 
                     nama_pegawai: null,
                     idRole: null,
@@ -161,16 +166,31 @@
                 roles: ['MGR','ADM','CSV'],
                 genders: ['Female','Male'],
                 btnShow: false,
+                tabs: null,
+                dialogType: 'Are you sure have filled in the correct and appropriate data?',
             };
         },
 
 
         methods: { 
+            setDialog(){
+                if(this.dialogType == 'Are you sure you want to delete these data?'){
+                    this.dialogConfirm = false;
+                    this.deleteData();
+                }else if(this.dialogType == 'Are you sure you want to save these changes?'){
+                    this.dialogConfirm = false;
+                    this.updateData();
+                }else if(this.dialogType == 'Are you sure have filled in the correct and appropriate data?'){
+                    this.dialogConfirm = false;
+                    this.saveData();
+                }
+            }, 
+
             setForm(){
                 if(this.inputType !== 'Create'){
-                    this.updateData();
+                    this.dialogType = 'Are you sure you want to save these changes?';
                 }else{
-                    this.saveData();
+                    this.dialogType = 'Are you sure have filled in the correct and appropriate data?';
                 }
             },
 
@@ -273,7 +293,7 @@
 
             editHandler(item) {
                 this.inputType = 'Update'; 
-                
+                this.dialogType = 'Are you sure you want to save these changes?'
                 this.editId = item.id; 
                 this.form.nama_pegawai = item.nama_pegawai; 
                 this.form.idRole = item.idRole; 
@@ -286,7 +306,7 @@
 
             showHandler(item) {
                 this.btnShow = true;
-                this.inputType = 'Show'; 
+                this.inputType = 'Show';
                 this.editId = item.id; 
                 this.form.nama_pegawai = item.nama_pegawai; 
                 this.form.idRole = item.idRole; 
@@ -300,6 +320,7 @@
 
             deleteHandler(id) {
                 this.deleteId = id; 
+                this.dialogType = 'Are you sure you want to delete these data?'
                 this.dialogConfirm = true;
             },
 
@@ -338,7 +359,7 @@
             },
             
             getColorRole (role) {
-                if (role === 'MGR') return 'red'
+                if (role === 'MGR') return 'indigo'
                 else if (role === 'ADM') return 'success'
                 else if (role === 'CSV') return 'orange'
             },
@@ -354,6 +375,10 @@
         computed: {
             formTitle() {
                 return this.inputType;
+            },
+
+            dialogText() {
+                return this.dialogType;
             },
         },
 

@@ -19,13 +19,13 @@
                             <v-btn @click="showHandler(item)" class="mx-2 mr-2" fab dark x-small color="indigo">
                                 <v-icon dark>mdi-eye</v-icon>
                             </v-btn>
-                            <v-btn v-if="item.status_transaksi == 'Your payment is being processed! Waiting CS response' || item.status_transaksi == 'quest is being processed! Waiting CS response'" @click="acceptHandler(item)" class="mx-2 mr-2" fab dark x-small color="success">
+                            <v-btn v-if="item.status_transaksi == 'Your payment is being processed! Waiting CS response' || item.status_transaksi == 'Your request is being processed! Waiting CS response'  && item.idEmployee == csId || item.idEmployee == null" @click="acceptHandler(item)" class="mx-2 mr-2" fab dark x-small color="success">
                                 <v-icon dark>mdi-check-bold</v-icon>
                             </v-btn>
-                            <v-btn v-if="item.status_transaksi == 'Your payment is being processed! Waiting CS response' || item.status_transaksi == 'Your request is being processed! Waiting CS response'" @click="rejectHandler(item)" class="mx-2 mr-2" fab dark x-small color="error">
+                            <v-btn v-if="item.status_transaksi == 'Your payment is being processed! Waiting CS response' || item.status_transaksi == 'Your request is being processed! Waiting CS response'  && item.idEmployee == csId || item.idEmployee == null" @click="rejectHandler(item)" class="mx-2 mr-2" fab dark x-small color="error">
                                 <v-icon dark>mdi-close-thick</v-icon>
                             </v-btn>
-                            <v-btn v-if="item.status_transaksi == 'Your request has been accepted!'" @click="returnHandler(item)" class="mx-2 mr-2" fab dark x-small color="yellow">
+                            <v-btn v-if="item.status_transaksi == 'Your request has been accepted!' && item.idEmployee == csId" @click="returnHandler(item)" class="mx-2 mr-2" fab dark x-small color="yellow">
                                 <v-icon dark>mdi-car</v-icon>
                             </v-btn>
                         </template> 
@@ -78,32 +78,29 @@
                                         </v-row>
                                     </v-card>
                                 </v-row> 
-                                <v-row v-if="form.jenis_transaksi == 'Car + Driver'" align="center" justify="center">
-                                    <v-card rounded="10" color="yellow" width="900px" max-height="220px">
+                                <v-row class="mt-8" v-if="form.jenis_transaksi == 'Car + Driver'" align="center" justify="center">
+                                    <v-card rounded="10" color="yellow" width="920px" max-height="300px">
                                         <v-card-title class="pengenaltxt">Selected Drive</v-card-title>
                                         <v-row class="mx-3">
                                             <v-col cols="3">
-                                                <v-img class="mb-3 mt-0" width="200px" height="130px" :src="$imgloader+selectedDriverShow.url_car_img"></v-img>
+                                                <v-img class=" mt-0 ml-5" width="150px" height="150px" :src="$imgloader+selectedDriverShow.url_foto_driver"></v-img>
+                                                <v-rating v-model="selectedDriverShow.rerata_rating" background-color="grey" color="indigo" readonly ></v-rating>
                                             </v-col>
-                                            <v-col cols="3">
-                                                <v-text-field background-color="white" class="formtxt" dense rounded filled v-model="selectedDriverShow.no_plat" label="Plat Number" readonly></v-text-field>
-                                                <v-text-field background-color="white" class="formtxt" dense rounded filled v-model="selectedDriverShow.nama_mobil" label="Name" readonly></v-text-field>
+                                            <v-col cols="4">
+                                                <v-text-field background-color="white" class="formtxt" dense rounded filled v-model="selectedDriverShow.nama_driver" label="Name" :readonly="btnShowRent == true"></v-text-field>
+                                                <v-text-field background-color="white" class="formtxt" dense rounded filled v-model="selectedDriverShow.gender_driver" label="Gender" :readonly="btnShowRent == true"></v-text-field>
                                             </v-col>
-                                            <v-col cols="3">
-                                                <v-text-field background-color="white" class="formtxt" dense rounded filled v-model="selectedDriverShow.jenis_bahan_bakar" label="Fuel" readonly></v-text-field>
-                                                <v-text-field background-color="white" class="formtxt" dense rounded filled v-model="selectedDriverShow.tarif_harian_mobil" label="Daily Cost" readonly></v-text-field>
-                                            </v-col>
-                                            <v-col cols="3">
-                                                <v-text-field background-color="white" class="formtxt" dense rounded filled v-model="selectedDriverShow.kapasitas_penumpang" label="Total Passanger" readonly></v-text-field>
-                                                <v-text-field background-color="white" class="formtxt" dense rounded filled v-model="selectedDriverShow.fasilitas_mobil" label="Facility" readonly></v-text-field>
+                                            <v-col cols="4">
+                                                <v-text-field background-color="white" class="formtxt" dense rounded filled v-model="selectedDriverShow.kemampuan_bahasa" label="Languange" :readonly="btnShowRent == true"></v-text-field>
+                                                <v-text-field background-color="white" class="formtxt" dense rounded filled v-model="selectedDriverShow.tarif_harian_driver" label="Daily Cost" :readonly="btnShowRent == true"></v-text-field>
                                             </v-col>
                                         </v-row>
                                     </v-card>
                                 </v-row> 
-                                <v-card class="mt-10 pa-0" color="black" height="2px" width="930px"></v-card>
+                                <v-card class="mt-10 pa-0" color="black" height="3px" width="930px"></v-card>
                                 <p class="headline indigo--text mt-5">Data Payment</p>
-                                <v-row class="mt-n5" v-if="form.status_transaksi == 'Please make payment immediately and complete the data payment!'" align="center" justify="center">
-                                    <v-col cols="3">
+                                <v-row v-if="form.tgl_pengembalian != null" class="mt-n5" align="center" justify="center">
+                                    <v-col v-if="form.url_bukti_pembayaran != 'default/noimg.jpg'" cols="3">
                                         <v-img class="mb-3 mt-0" width="200px" height="130px" :src="$imgloader+form.url_bukti_pembayaran"></v-img> 
                                     </v-col>
                                     <v-col>
@@ -121,7 +118,8 @@
                             </v-container>  
                         </v-card-text> 
                         <v-card-actions>
-                            <v-btn color="blue darken-1" text @click="dialog=false"> Close </v-btn>
+                            <v-spacer></v-spacer> 
+                            <v-btn color="indigo" class="font-weight-bold" text @click="dialog = false"> Close </v-btn>
                         </v-card-actions> 
                     </v-card> 
                 </v-dialog>
@@ -134,8 +132,8 @@
                         <v-card-actions>
                             <v-text-field v-if="dialogType == 'Are you sure want to reject this request?'" class="formtxt" v-model="note_transaksi" label="Note" required ></v-text-field>
                             <v-spacer></v-spacer>
-                            <v-btn color="blue darken-1" text @click="dialogConfirm = false">Cancel</v-btn>
-                            <v-btn color="blue darken-1" text @click="setDialog">Yes</v-btn>
+                            <v-btn color="indigo" class="font-weight-bold" text @click="dialogConfirm = false">Cancel</v-btn>
+                            <v-btn color="error" class="font-weight-bold" text @click="setDialog">Yes</v-btn>
                         </v-card-actions>
                     </v-card>
                 </v-dialog>
@@ -239,7 +237,10 @@
                     sub_total_pembayaran: null,
                     total_potongan_promo: null,
                     total_pembayaran: null,
-                }
+                },
+                editCar: null,
+                editDriver: null,
+                csId: localStorage.getItem('id'),
             };
         },
 
@@ -353,6 +354,8 @@
                 this.dialogConfirm = true;
                 this.returnId = item.id;
                 this.sts_transaksi = 'Please make payment immediately and complete the data payment!'
+                this.editCar = item.idCar;
+                this.editDriver = item.idDriver;
 
                 var today = new Date();
                 var dd = String(today.getDate()).padStart(2, '0');
@@ -361,23 +364,6 @@
                 var tgl_pengembalian = yyyy + '-' + mm + '-' + dd;
                 var wkt_pengembalian = String(today.getHours()).padStart(2, '0') + ':' + String(today.getMinutes()).padStart(2, '0');
                 this.return_date = tgl_pengembalian + ' ' + wkt_pengembalian;
-
-                var return_date = new Date(this.form.tgl_pengembalian);
-                var selesai_sewa = new Date(this.form.tgl_selesai_sewa +' '+ this.form.wkt_selesai_sewa);
-                const diffTime = Math.abs(return_date - selesai_sewa);
-                const diffHours = Math.ceil(diffTime / (1000 * 60 * 60)); 
-                const mod = diffHours % 24;
-                if(mod>3){
-                    var diffDays = Math.ceil(diffHours / 24);
-                }else if (mod<=3){
-                    diffDays = Math.floor(diffHours / 24);
-                }
-
-                if(this.form.idDriver != null && this.form.jenis_transaksi == 'Car + Driver'){
-                    this.cost = (diffDays * this.selectedCarShow.tarif_harian_mobil) + (diffDays * this.selectedDriverShow.tarif_harian_driver)
-                }else if(this.form.jenis_transaksi == 'Only Car'){
-                    this.cost = diffDays * this.selectedCarShow.tarif_harian_mobil;
-                }
             },
 
             return(){
@@ -385,7 +371,6 @@
                     idEmployee: localStorage.getItem('id'),
                     status_transaksi: this.sts_transaksi,
                     tgl_pengembalian: this.return_date,
-                    sub_total_pembayaran: this.cost,
                 }; 
 
                 var url = this.$api + '/custTransaction/'+ this.returnId 
@@ -401,7 +386,57 @@
                     this.load = false; 
                     this.dialogConfirm = false; 
                     this.readData();
+                    this.carAvailability();
+                    this.driverAvailability();
                     this.dialogType = 'Are you sure want to accept this request?';
+                }).catch(error => {
+                    this.error_message = error.response.data.message; 
+                    this.color = 'red'; 
+                    this.snackbar = true; 
+                    this.load = false;
+                });
+            },
+
+            carAvailability(){
+                let newData = {
+                    ketersediaan_mobil : 'Available',
+                };
+
+                var url = this.$api + '/selectedCarCs/' + this.editCar;
+                this.$http.put(url, newData, {
+                    headers:{
+                        'Authorization' : 'Bearer ' + localStorage.getItem('token')
+                    }
+                }).then(response => {
+                    this.error_message = response.data.message; 
+                    this.color = 'green'; 
+                    this.snackbar = true; 
+                    this.load = false; 
+                    this.readDataCar();
+                }).catch(error => {
+                    this.error_message = error.response.data.message; 
+                    this.color = 'red'; 
+                    this.snackbar = true; 
+                    this.load = false;
+                });
+            },
+
+            driverAvailability(){
+                let newData = {
+                    status_ketersediaan_driver : 'Available',
+                };
+
+                var url = this.$api + '/selectedDriverCs/' + this.editDriver ;
+                this.$http.put(url, newData, {
+                    headers:{
+                        'Authorization' : 'Bearer ' + localStorage.getItem('token')
+                    }
+                }).then(response => {
+                    this.error_message = response.data.message; 
+                    this.color = 'green'; 
+                    this.snackbar = true; 
+                    this.load = false; 
+                    this.readDataDriver();
                 }).catch(error => {
                     this.error_message = error.response.data.message; 
                     this.color = 'red'; 
@@ -440,7 +475,7 @@
                 this.form.tgl_selesai_sewa = tgl_selesai;
                 this.form.wkt_selesai_sewa = wkt_selesai;
 
-                var url = this.$api + '/showCarr/' + item.idCar;
+                var url = this.$api + '/showCar/' + item.idCar;
                 this.$http.get(url, {
                     headers:{
                         'Authorization' : 'Bearer ' + localStorage.getItem('token')

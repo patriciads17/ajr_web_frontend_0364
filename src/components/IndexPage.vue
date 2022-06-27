@@ -1,6 +1,6 @@
 <template>
     <div> 
-        <div class="indigo accent-1">
+        <div class="indigo lighten-3 ">
             <v-app-bar height="100px" rounded app absolute class="app-header transparent" flat elevate-on-scroll>
                 <v-container>
                     <v-img :src="require('@/assets/ajr_logo.png')" alt="AJR Logo" height="80px" width="80px"></v-img>
@@ -10,35 +10,35 @@
 
             <div class="banner-wrapper">
                 <v-container>
-                    <v-row justify="center">
-                        <v-col cols="12" md="7" lg="6" class="d-flex align-center">
+                    <v-row>
+                        <v-col class="d-flex align-center justify-center" cols="12" md="5" lg="6">
+                            <v-img
+                                :src="require('@/assets/ajr_lp.png')" alt="banner"/>
+                        </v-col>
+                        <v-col cols="12" md="7" lg="6" class="d-flex align-center justify-center">
                             <div class="text-center text-md-left">
-                                <h1 class="banner-title font-weight-bold white--text">
+                                <h1 class="banner-title font-weight-bold" style="color:#FFEB3B">
                                     NEED TO RENT A CAR?
                                 </h1>
-                                <h4 class="banner-subtitle white--text font-weight-regular">
-                                    Sign up now and get special discount!
+                                <h4 class="banner-subtitle font-weight-regular" style="color:#FFEB3B">
+                                    Register now and get special discount!
                                 </h4>
-                                <div class="mt-12 pt-2">
-                                    <v-btn @click="sign_up" color="error" class="btn-text r-0 mr-md-8 mb-5 mb-md-0 btn-custom-md" large target="_blank" elevation="0">
-                                        Sign Up
+                                <div class="mt-12 pt-2 d-flex justify-center">
+                                    <v-btn @click="sign_up" color="#3949AB" class="btn-text white--text r-0 mr-md-8 mb-5 mb-md-0 btn-custom-md" large target="_blank" elevation="0">
+                                        Register Now!
                                     </v-btn>
-                                    <v-btn @click="sign_in"  class="btn-text btn-custom-md" large outlined color="white" elevation="0">
-                                        Sign In
+                                    <v-btn @click="sign_in" class="btn-text indigo--text btn-custom-md font-weight-bold" large color="yellow" elevation="0">
+                                        Log In
                                     </v-btn>
                                 </div>
                             </div>
-                        </v-col>
-                        <v-col cols="12" md="5" lg="6">
-                            <v-img
-                                :src="require('@/assets/ajr_lp.png')" alt="banner"/>
                         </v-col>
                     </v-row>
                 </v-container>
             </div>
         </div>
 
-        <div>
+        <div class="d-flex">
             <v-container align="center" justify="center">
                 <v-row justify="center" class="mt-5">
                     <v-col cols="12" sm="10" md="9" lg="7">
@@ -50,9 +50,9 @@
                     </v-col>
                 </v-row>
 
-                <v-row class="mt-13" align="center" justify="center">
+                <v-row class="d-flex justify-center mt-13" align="center" justify="center">
                     <template v-for="(item, i) in items">
-                        <v-col :key="i" cols="12" md="4">
+                        <v-col :key="i" cols="auto" >
                             <v-hover v-slot="{ hover }">
                                 <v-card :elevation="hover ? 12 :2" :class="{ 'on-hover' : hover }" max-width="400" height="400px">
                                     <v-img :src="item.img" height="250px"></v-img>
@@ -70,6 +70,26 @@
                 </v-row>
             </v-container>
         </div>
+
+        <div class="banner-wrapper yellow lighten-3" style="margin-top: 80px">
+            <v-container>
+                <v-row justify="center">
+                    <v-col cols="12" md="7" lg="6" class="d-flex align-center justify-center">
+                        <div class="text-center text-md-left">
+                            <h1 class="banner-title font-weight-bold indigo--text">WANT TO BE YOUR OWN BOSS?</h1>
+                            <h4 class="banner-subtitle indigo--text font-weight-regular">Come partner with us for flexibility in earning your own income</h4>
+                            <div class="d-flex justify-center mt-12 pt-2">
+                                <v-btn @click="regis" color="warning" class="d-flex justify-center btn-text r-0 mr-md-8 mb-5 mb-md-0 btn-custom-md" large target="_blank" elevation="0">Register Now!</v-btn>
+                            </div>
+                        </div>
+                    </v-col>
+                    <v-col cols="12" md="5" lg="6">
+                        <v-img
+                        :src="require('@/assets/ajr_driver.jpeg')" alt="banner"/>
+                    </v-col>
+                </v-row>
+            </v-container>
+        </div>
     </div>
 </template>
 
@@ -80,7 +100,7 @@
 
     .banner-wrapper {
         padding: 20px 0 20px;
-        min-height: 600px;
+        min-height: 400px;
         display: flex;
         align-items: center;
     }
@@ -147,12 +167,17 @@
         methods: {
             sign_up() {
                 this.$router.push({
-                    name: 'RegisterPage', 
+                    name: 'RegisterCustomer', 
                 }); 
             },
             sign_in() {
                 this.$router.push({
                     name: 'LoginPage', 
+                }); 
+            },
+            regis() {
+                this.$router.push({
+                    name: 'RegisterDriver', 
                 }); 
             },
         }

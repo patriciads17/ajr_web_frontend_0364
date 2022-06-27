@@ -53,9 +53,9 @@
                         </v-card-text> 
                         <v-card-actions>
                             <v-spacer></v-spacer> 
-                            <v-btn v-if="btnShow == true" color="blue darken-1" text @click="unshow"> Close </v-btn>
-                            <v-btn v-if="btnShow == false" color="blue darken-1" text @click="cancel"> Cancel </v-btn>
-                            <v-btn v-if="btnShow == false" color="blue darken-1" text @click="setForm"> Save </v-btn> 
+                            <v-btn v-if="btnShow == true" color="indigo" class="font-weight-bold" text @click="unshow"> Close </v-btn>
+                            <v-btn v-if="btnShow == false" color="indigo" class="font-weight-bold" text @click="cancel"> Cancel </v-btn>
+                            <v-btn v-if="btnShow == false" color="success" class="font-weight-bold" text @click="dialogConfirm = true; setForm()"> Save </v-btn> 
                         </v-card-actions> 
                     </v-card> 
                 </v-dialog>
@@ -64,11 +64,11 @@
                         <v-card-title>
                             <span class="headline"> Warning! </span>
                         </v-card-title>
-                        <v-card-text> Are you sure want to delete this promo? </v-card-text>
+                        <v-card-text> {{dialogText}} </v-card-text>
                         <v-card-actions>
                             <v-spacer></v-spacer>
-                            <v-btn color="blue darken-1" text @click="dialogConfirm = false">Cancel</v-btn>
-                            <v-btn color="blue darken-1" text @click="deleteData">Delete</v-btn>
+                            <v-btn color="indigo" class="font-weight-bold" text @click="dialogConfirm = false">Cancel</v-btn>
+                            <v-btn color="error" class="font-weight-bold" text @click="setDialog">Yes</v-btn>
                         </v-card-actions>
                     </v-card>
                 </v-dialog>
@@ -146,16 +146,30 @@
                 editId: '',
                 status_promo: ['Available','Unavailable'],
                 btnShow: false,
+                dialogType: 'Are you sure have filled in the correct and appropriate data?',
             };
         },
 
 
         methods: { 
+            setDialog(){
+                if(this.dialogType == 'Are you sure you want to delete these data?'){
+                    this.dialogConfirm = false;
+                    this.deleteData();
+                }else if(this.dialogType == 'Are you sure you want to save these changes?'){
+                    this.dialogConfirm = false;
+                    this.updateData();
+                }else if(this.dialogType == 'Are you sure have filled in the correct and appropriate data?'){
+                    this.dialogConfirm = false;
+                    this.saveData();
+                }
+            }, 
+            
             setForm(){
                 if(this.inputType !== 'Create'){
-                    this.update();
+                    this.dialogType = 'Are you sure you want to save these changes?';
                 }else{
-                    this.save();
+                    this.dialogType = 'Are you sure have filled in the correct and appropriate data?';
                 }
             },
 
@@ -257,6 +271,7 @@
             editHandler(item) {
                 this.inputType = 'Update'; 
                 this.editId = item.id; 
+                this.dialogType = 'Are you sure you want to save these changes?';
                 this.form.kode_promo = item.kode_promo; 
                 this.form.syarat_promo = item.syarat_promo; 
                 this.form.jenis_promo = item.jenis_promo; 
@@ -279,6 +294,7 @@
 
             deleteHandler(id) {
                 this.deleteId = id; 
+                this.dialogType = 'Are you sure you want to delete these data?'
                 this.dialogConfirm = true;
             },
 
@@ -323,6 +339,9 @@
         computed: {
             formTitle() {
                 return this.inputType;
+            },
+            dialogText() {
+                return this.dialogType;
             },
         },
 
